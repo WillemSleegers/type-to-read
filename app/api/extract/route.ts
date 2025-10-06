@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     // Fetch the page
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; TouchToRead/1.0; +https://github.com/yourusername/touch-to-read)'
+        'User-Agent': 'Mozilla/5.0 (compatible; TypeToRead/1.0)'
       }
     })
 

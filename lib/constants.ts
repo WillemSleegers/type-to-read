@@ -25,11 +25,7 @@ export const VERY_LONG_WORD_THRESHOLD = 12
 export const SHORT_WORD_THRESHOLD = 3
 
 // Default welcome text
-export const DEFAULT_TEXT = `Welcome to Type to Read! This is a typing practice app that lets you learn to type while reading content you actually want to read.
-
-Start typing the text you see, and watch your speed and accuracy improve. The more you type, the better you get.
-
-Try loading your own text to practice typing while learning something new. Happy typing!`
+export const DEFAULT_TEXT = `Welcome to Type to Read! This is a typing practice app that lets you learn to type while reading content you actually want to read. Start typing the text you see, and watch your speed and accuracy improve. The more you type, the better you get. Try loading your own text to practice typing while learning something new. Happy typing!`
 
 // Sample texts for the text input dialog
 export const SAMPLE_TEXTS = [
