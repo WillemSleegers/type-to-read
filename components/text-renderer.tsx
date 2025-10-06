@@ -6,7 +6,6 @@ interface TextRendererProps {
   isFinished: boolean
   fontSize: number
   lineHeight: number
-  isTyping: boolean
 }
 
 export const TextRenderer = memo(function TextRenderer({
@@ -15,7 +14,6 @@ export const TextRenderer = memo(function TextRenderer({
   isFinished,
   fontSize,
   lineHeight,
-  isTyping,
 }: TextRendererProps) {
   const [scrollOffset, setScrollOffset] = useState(0)
   const charRefs = useRef<(HTMLSpanElement | null)[]>([])

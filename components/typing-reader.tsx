@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { TextInputDialog } from "@/components/text-input-dialog"
 import { TypingSettings } from "@/components/typing-settings"
-import { TypingStatsDisplay } from "@/components/typing-stats-display"
 import { TextRenderer } from "@/components/text-renderer"
 import { useTypingStats } from "@/hooks/use-typing-stats"
 import { useTextProcessing } from "@/hooks/use-text-processing"
@@ -25,7 +24,6 @@ export function TypingReader() {
   // Text state
   const [text, setText] = useState(DEFAULT_TEXT)
   const [typedText, setTypedText] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
 
   // Refs
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -107,7 +105,6 @@ export function TypingReader() {
 
   const handleRestart = useCallback(() => {
     setTypedText("")
-    setIsTyping(false)
     resetStats()
     setTimeout(() => inputRef.current?.focus(), 0)
   }, [resetStats])
@@ -192,7 +189,6 @@ export function TypingReader() {
                   isFinished={isFinished}
                   fontSize={fontSize}
                   lineHeight={lineHeight}
-                  isTyping={isTyping}
                 />
               </div>
 
@@ -239,8 +235,6 @@ export function TypingReader() {
             ref={inputRef}
             value={typedText}
             onChange={handleTyping}
-            onFocus={() => setIsTyping(true)}
-            onBlur={() => setIsTyping(false)}
             className="sr-only"
             autoFocus
             spellCheck={false}
