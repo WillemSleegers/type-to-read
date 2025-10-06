@@ -28,6 +28,11 @@ export const TextRenderer = memo(function TextRenderer({
     }
   }, [typedText.length])
 
+  // Reset scroll when font size/line height changes
+  useEffect(() => {
+    setScrollOffset(0)
+  }, [lineHeight])
+
   // Clear refs array when displayText changes
   useEffect(() => {
     charRefs.current = []
@@ -148,9 +153,9 @@ export const TextRenderer = memo(function TextRenderer({
       elements.push(
         <span
           key="finished"
-          className="ml-4 text-green-600 dark:text-green-400 font-bold animate-in fade-in zoom-in-50 duration-500"
+          className="ml-4 text-green-600 dark:text-green-400 font-bold animate-in fade-in zoom-in-50 duration-300"
         >
-          {' '}FINISHED
+          FINISHED
         </span>
       )
     }
@@ -161,9 +166,7 @@ export const TextRenderer = memo(function TextRenderer({
   return (
     <div
       ref={containerRef}
-      className={`font-mono transition-all duration-300 ease-out ${
-        isTyping ? 'cursor-text opacity-100' : 'opacity-70'
-      }`}
+      className="font-mono transition-all duration-300 ease-out opacity-70"
       style={{
         fontSize: `${fontSize}px`,
         lineHeight: 'normal',

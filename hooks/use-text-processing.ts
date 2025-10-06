@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 export function useTextProcessing(
   text: string,
+  includePeriods: boolean,
   includePunctuation: boolean,
   includeCapitalization: boolean
 ) {
@@ -9,8 +10,13 @@ export function useTextProcessing(
     let processed = text
 
     if (!includePunctuation) {
-      // Remove all punctuation except periods and commas, preserve spaces
-      processed = processed.replace(/[^\w\s.,]/g, '')
+      // Remove all punctuation except periods (handled separately)
+      processed = processed.replace(/[^\w\s.]/g, '')
+    }
+
+    if (!includePeriods) {
+      // Remove periods
+      processed = processed.replace(/\./g, '')
     }
 
     if (!includeCapitalization) {
@@ -23,5 +29,5 @@ export function useTextProcessing(
     processed = processed.replace(/\n +/g, ' ').replace(/\n/g, ' ')
 
     return processed
-  }, [text, includePunctuation, includeCapitalization])
+  }, [text, includePeriods, includePunctuation, includeCapitalization])
 }

@@ -17,10 +17,13 @@ interface TypingSettingsProps {
   onOpenChange: (open: boolean) => void
   fontSize: number
   onFontSizeChange: (size: number) => void
+  includePeriods: boolean
+  onIncludePeriodsChange: (value: boolean) => void
   includePunctuation: boolean
   onIncludePunctuationChange: (value: boolean) => void
   includeCapitalization: boolean
   onIncludeCapitalizationChange: (value: boolean) => void
+  onClose?: () => void
 }
 
 export function TypingSettings({
@@ -28,10 +31,13 @@ export function TypingSettings({
   onOpenChange,
   fontSize,
   onFontSizeChange,
+  includePeriods,
+  onIncludePeriodsChange,
   includePunctuation,
   onIncludePunctuationChange,
   includeCapitalization,
   onIncludeCapitalizationChange,
+  onClose,
 }: TypingSettingsProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -41,7 +47,10 @@ export function TypingSettings({
           <span className="sr-only">Settings</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent onCloseAutoFocus={(e) => {
+        e.preventDefault()
+        onClose?.()
+      }}>
         <DialogHeader>
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
@@ -62,8 +71,22 @@ export function TypingSettings({
           </div>
 
           <div className="flex items-center justify-between">
+            <Label htmlFor="periods" className="cursor-pointer">
+              Include Periods
+            </Label>
+            <Switch
+              id="periods"
+              checked={includePeriods}
+              onCheckedChange={onIncludePeriodsChange}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground -mt-4">
+            When off, removes all periods (. characters)
+          </p>
+
+          <div className="flex items-center justify-between">
             <Label htmlFor="punctuation" className="cursor-pointer">
-              Include All Punctuation
+              Include Punctuation
             </Label>
             <Switch
               id="punctuation"
@@ -72,7 +95,7 @@ export function TypingSettings({
             />
           </div>
           <p className="text-xs text-muted-foreground -mt-4">
-            When off, removes symbols like apostrophes and quotes (keeps periods and commas)
+            When off, removes commas, quotes, apostrophes, and other symbols
           </p>
 
           <div className="flex items-center justify-between">

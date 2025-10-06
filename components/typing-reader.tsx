@@ -16,6 +16,7 @@ import { DEFAULT_TEXT } from "@/lib/constants"
 export function TypingReader() {
   // Settings
   const [fontSize, setFontSize] = useState(24)
+  const [includePeriods, setIncludePeriods] = useState(true)
   const [includePunctuation, setIncludePunctuation] = useState(true)
   const [includeCapitalization, setIncludeCapitalization] = useState(true)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -42,7 +43,7 @@ export function TypingReader() {
   }, [fontSize])
 
   // Process text based on settings
-  const displayText = useTextProcessing(text, includePunctuation, includeCapitalization)
+  const displayText = useTextProcessing(text, includePeriods, includePunctuation, includeCapitalization)
 
   // Calculate stats
   const { stats, reset: resetStats } = useTypingStats(typedText, displayText)
@@ -59,6 +60,7 @@ export function TypingReader() {
     const settings = loadSettings()
     if (settings) {
       setFontSize(settings.fontSize)
+      setIncludePeriods(settings.includePeriods ?? true)
       setIncludePunctuation(settings.includePunctuation)
       setIncludeCapitalization(settings.includeCapitalization)
     }
@@ -70,10 +72,11 @@ export function TypingReader() {
     if (!settingsLoaded) return
     saveSettings({
       fontSize,
+      includePeriods,
       includePunctuation,
       includeCapitalization,
     })
-  }, [fontSize, includePunctuation, includeCapitalization, settingsLoaded])
+  }, [fontSize, includePeriods, includePunctuation, includeCapitalization, settingsLoaded])
 
   // Reset typed text when display text changes
   useEffect(() => {
@@ -81,19 +84,19 @@ export function TypingReader() {
     resetStats()
   }, [displayText, resetStats])
 
-  // Handle Esc key to stop typing
+  // Auto-focus textarea when clicking anywhere on the page
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isTyping) {
-        e.preventDefault()
-        setIsTyping(false)
-        inputRef.current?.blur()
+    const handleClick = () => {
+      if (document.activeElement?.tagName !== 'INPUT' &&
+          document.activeElement?.tagName !== 'TEXTAREA' &&
+          document.activeElement?.tagName !== 'BUTTON') {
+        inputRef.current?.focus()
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [isTyping])
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
 
   const handleTextSubmit = useCallback((newText: string) => {
     setText(newText)
@@ -106,6 +109,7 @@ export function TypingReader() {
     setTypedText("")
     setIsTyping(false)
     resetStats()
+    setTimeout(() => inputRef.current?.focus(), 0)
   }, [resetStats])
 
   const handleTyping = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -119,34 +123,47 @@ export function TypingReader() {
 
   return (
     <div className="h-dvh flex flex-col relative overflow-hidden">
-      {/* Header */}
+      {/* Top left - Load text */}
+      <div className="fixed top-0 left-0 p-4 z-10">
+        <TextInputDialog
+          onTextSubmit={handleTextSubmit}
+          textButton
+          onClose={() => inputRef.current?.focus()}
+        />
+      </div>
+
+      {/* Top right - Settings and Theme */}
       <div className="fixed top-0 right-0 p-4 flex gap-2 z-10">
         <TypingSettings
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
           fontSize={fontSize}
           onFontSizeChange={setFontSize}
+          includePeriods={includePeriods}
+          onIncludePeriodsChange={setIncludePeriods}
           includePunctuation={includePunctuation}
           onIncludePunctuationChange={setIncludePunctuation}
           includeCapitalization={includeCapitalization}
           onIncludeCapitalizationChange={setIncludeCapitalization}
+          onClose={() => inputRef.current?.focus()}
         />
-        <ThemeToggle />
+        <ThemeToggle onToggle={() => inputRef.current?.focus()} />
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 pt-20">
+      <div className="flex flex-col items-center p-8 pt-32">
         <div className="w-full max-w-4xl">
           {settingsLoaded && (
             <>
-              {/* Stats display */}
-              <TypingStatsDisplay
-                typedLength={typedText.length}
-                totalLength={displayText.length}
-                isFinished={isFinished}
-                stats={stats}
-                fontSize={fontSize}
-              />
+              {/* Character count */}
+              <div className="mt-6 mb-8">
+                <div
+                  className="font-mono text-primary transition-all duration-200"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                  {typedText.length}/{displayText.length}
+                </div>
+              </div>
 
               {/* Hidden measurement element */}
               <span
@@ -178,11 +195,12 @@ export function TypingReader() {
                   isTyping={isTyping}
                 />
               </div>
+
             </>
           )}
 
-          {/* Controls */}
-          <div className="flex justify-center gap-3 mt-8">
+          {/* Restart button */}
+          <div className="flex justify-center mt-8">
             <Button
               onClick={handleRestart}
               variant="ghost"
@@ -193,8 +211,28 @@ export function TypingReader() {
               <RotateCcw className="size-6" />
               <span className="sr-only">Restart</span>
             </Button>
-            <TextInputDialog onTextSubmit={handleTextSubmit} />
           </div>
+
+          {/* Performance stats (only when finished) */}
+          {isFinished && (
+            <div
+              className="flex flex-col items-center gap-2 font-mono animate-in fade-in slide-in-from-top-4 duration-300 mt-8"
+              style={{ fontSize: `${fontSize}px` }}
+            >
+              <div>
+                <span className="text-muted-foreground">WPM: </span>
+                <span className="font-semibold">{stats.wpm}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Accuracy: </span>
+                <span className="font-semibold">{stats.accuracy.toFixed(1)}%</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Errors: </span>
+                <span className="font-semibold text-red-600 dark:text-red-400">{stats.errors}</span>
+              </div>
+            </div>
+          )}
 
           {/* Hidden input */}
           <textarea

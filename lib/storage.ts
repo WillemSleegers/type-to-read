@@ -2,6 +2,7 @@
 
 export interface TypingSettings {
   fontSize: number
+  includePeriods: boolean
   includePunctuation: boolean
   includeCapitalization: boolean
 }

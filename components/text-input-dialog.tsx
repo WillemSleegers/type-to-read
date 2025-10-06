@@ -18,9 +18,11 @@ import { SAMPLE_TEXTS } from "@/lib/constants"
 
 interface TextInputDialogProps {
   onTextSubmit: (text: string) => void
+  textButton?: boolean
+  onClose?: () => void
 }
 
-export function TextInputDialog({ onTextSubmit }: TextInputDialogProps) {
+export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: TextInputDialogProps) {
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<
     "paste" | "file" | "url" | "sample"
@@ -92,12 +94,24 @@ export function TextInputDialog({ onTextSubmit }: TextInputDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="lg" className="size-14">
-          <FileText className="size-6" />
-          <span className="sr-only">Load Text</span>
-        </Button>
+        {textButton ? (
+          <Button size="sm">
+            Load text
+          </Button>
+        ) : (
+          <Button variant="ghost" size="lg" className="size-14">
+            <FileText className="size-6" />
+            <span className="sr-only">Load Text</span>
+          </Button>
+        )}
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent
+        className="max-w-2xl max-h-[80vh]"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault()
+          onClose?.()
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Load Text to Read</DialogTitle>
           <DialogDescription>
