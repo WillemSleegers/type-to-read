@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FileText, Type, Link as LinkIcon, Loader2 } from "lucide-react"
+import { FileText, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -126,7 +126,7 @@ export function TextInputDialog({
         )}
       </DialogTrigger>
       <DialogContent
-        className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="max-w-[95vw] sm:max-w-2xl h-[600px] flex flex-col"
         onCloseAutoFocus={(e) => {
           e.preventDefault()
           onClose?.()
@@ -136,59 +136,51 @@ export function TextInputDialog({
           <DialogTitle>Load Text</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4 flex flex-col flex-1 overflow-hidden">
           {/* Tabs */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               variant={activeTab === "paste" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("paste")}
-              className="gap-2"
             >
-              <Type className="h-4 w-4" />
               Paste
             </Button>
             <Button
               variant={activeTab === "file" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("file")}
-              className="gap-2"
             >
-              <FileText className="h-4 w-4" />
               File
             </Button>
             <Button
               variant={activeTab === "url" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("url")}
-              className="gap-2"
             >
-              <LinkIcon className="h-4 w-4" />
               URL
             </Button>
             <Button
               variant={activeTab === "sample" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("sample")}
-              className="gap-2"
             >
-              <FileText className="h-4 w-4" />
               Samples
             </Button>
           </div>
 
           {/* Content */}
-          <div className="flex flex-col min-h-[300px]">
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
             {activeTab === "paste" && (
-              <div className="flex flex-col flex-1 gap-3">
+              <div className="flex flex-col h-full gap-2 sm:gap-3 overflow-hidden">
                 <Textarea
                   id="text-input"
                   placeholder="Paste the text you want to read..."
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
-                  className="resize-none flex-1"
+                  className="resize-none flex-1 min-h-0"
                 />
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground flex-shrink-0">
                   {pasteText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
                   words
                 </p>
@@ -196,8 +188,8 @@ export function TextInputDialog({
             )}
 
             {activeTab === "url" && (
-              <div className="flex flex-col flex-1 gap-4">
-                <div className="space-y-3">
+              <div className="flex flex-col h-full gap-2 sm:gap-3">
+                <div className="space-y-2 sm:space-y-3 flex-shrink-0">
                   <div className="flex flex-1 gap-2">
                     <input
                       id="url-input"
@@ -229,25 +221,27 @@ export function TextInputDialog({
                     Paste a URL to automatically extract readable text
                   </p>
                 </div>
-                {urlText && (
-                  <div className="flex flex-col flex-1 gap-2">
-                    <Textarea
-                      value={urlText}
-                      onChange={(e) => setUrlText(e.target.value)}
-                      className="resize-none flex-1"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      {urlText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
-                      words
-                    </p>
-                  </div>
-                )}
+                <div className="flex flex-col flex-1 gap-2 min-h-0 overflow-hidden">
+                  {urlText && (
+                    <>
+                      <Textarea
+                        value={urlText}
+                        onChange={(e) => setUrlText(e.target.value)}
+                        className="resize-none flex-1 min-h-0"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        {urlText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
+                        words
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
             {activeTab === "file" && (
-              <div className="flex flex-col flex-1 gap-4">
-                <div className="space-y-3">
+              <div className="flex flex-col h-full gap-2 sm:gap-3">
+                <div className="space-y-2 sm:space-y-3 flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -275,25 +269,27 @@ export function TextInputDialog({
                     Supports .txt and .md files
                   </p>
                 </div>
-                {fileText && (
-                  <div className="flex flex-col flex-1 gap-2">
-                    <Textarea
-                      value={fileText}
-                      onChange={(e) => setFileText(e.target.value)}
-                      className="resize-none flex-1"
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      {fileText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
-                      words
-                    </p>
-                  </div>
-                )}
+                <div className="flex flex-col flex-1 gap-2 min-h-0 overflow-hidden">
+                  {fileText && (
+                    <>
+                      <Textarea
+                        value={fileText}
+                        onChange={(e) => setFileText(e.target.value)}
+                        className="resize-none flex-1 min-h-0"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        {fileText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
+                        words
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
             {activeTab === "sample" && (
-              <div className="space-y-3">
-                <div className="space-y-2 max-h-[300px] sm:max-h-[400px] overflow-y-auto">
+              <div className="h-full flex flex-col overflow-hidden">
+                <div className="space-y-2 flex-1 overflow-y-auto">
                   {SAMPLE_TEXTS.map((sample, index) => (
                     <button
                       key={index}
@@ -304,11 +300,11 @@ export function TextInputDialog({
                           : "hover:bg-secondary/50"
                       }`}
                     >
-                      <div className="font-semibold">{sample.title}</div>
+                      <div className="font-semibold text-base">{sample.title}</div>
                       <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
                         {sample.text}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-2">
+                      <div className="text-xs text-muted-foreground mt-1.5 sm:mt-2">
                         {sample.text.split(/\s+/).length} words
                       </div>
                     </button>
@@ -319,7 +315,7 @@ export function TextInputDialog({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex justify-end gap-2 pt-3 sm:pt-4 flex-shrink-0">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
