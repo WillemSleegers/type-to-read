@@ -39,8 +39,8 @@ export function TypingReader() {
   const { stats, reset: resetStats } = useTypingStats(typedText, displayText)
   const isFinished = typedText.length === displayText.length && displayText.length > 0
 
-  // Container height for exactly 3 lines
-  const containerHeight = lineHeight * 3
+  // Container height: 3 lines while typing, 2 lines when finished
+  const containerHeight = isFinished ? lineHeight * 2 : lineHeight * 3
 
   // Load settings on mount
   useEffect(() => {

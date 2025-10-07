@@ -26,6 +26,16 @@ export const TextRenderer = memo(function TextRenderer({
     }
   }, [typedText.length])
 
+  // When finished, scroll to show last 2 lines
+  useEffect(() => {
+    if (isFinished && containerRef.current) {
+      const totalHeight = containerRef.current.scrollHeight
+      const linesToShow = 2
+      const targetOffset = Math.max(0, totalHeight - (lineHeight * linesToShow))
+      setScrollOffset(targetOffset)
+    }
+  }, [isFinished, lineHeight])
+
   // Reset scroll when font size/line height changes
   useEffect(() => {
     setScrollOffset(0)
@@ -38,6 +48,9 @@ export const TextRenderer = memo(function TextRenderer({
 
   // Function to update scroll based on a character index
   const updateScroll = useCallback((charIndex: number) => {
+    // Don't update scroll when finished
+    if (isFinished) return
+
     const charRef = charRefs.current[charIndex]
     if (charRef) {
       const offsetTop = charRef.offsetTop
@@ -56,7 +69,7 @@ export const TextRenderer = memo(function TextRenderer({
         setScrollOffset(0)
       }
     }
-  }, [lineHeight])
+  }, [lineHeight, isFinished])
 
   const renderedText = useMemo(() => {
     const elements: React.JSX.Element[] = []
