@@ -27,18 +27,10 @@ export function TypingReader() {
 
   // Refs
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const measurementRef = useRef<HTMLSpanElement>(null)
   const initializedRef = useRef(false)
 
-  // Measure actual line height
-  const [lineHeight, setLineHeight] = useState(fontSize * 1.8) // fallback
-
-  useEffect(() => {
-    if (measurementRef.current) {
-      const height = measurementRef.current.offsetHeight
-      setLineHeight(height)
-    }
-  }, [fontSize])
+  // Calculate line height based on explicit line-height ratio
+  const lineHeight = fontSize * 1.5
 
   // Process text based on settings
   const displayText = useTextProcessing(text, includePeriods, includePunctuation, includeCapitalization)
@@ -47,7 +39,7 @@ export function TypingReader() {
   const { stats, reset: resetStats } = useTypingStats(typedText, displayText)
   const isFinished = typedText.length === displayText.length && displayText.length > 0
 
-  // Container height for 3 lines using measured line height
+  // Container height for exactly 3 lines
   const containerHeight = lineHeight * 3
 
   // Load settings on mount
@@ -129,8 +121,17 @@ export function TypingReader() {
         />
       </div>
 
-      {/* Top right - Settings and Theme */}
+      {/* Top right - Restart, Settings and Theme */}
       <div className="fixed top-0 right-0 p-4 flex gap-2 z-10">
+        <Button
+          onClick={handleRestart}
+          variant="ghost"
+          size="icon"
+          disabled={typedText.length === 0}
+        >
+          <RotateCcw className="size-4" />
+          <span className="sr-only">Restart</span>
+        </Button>
         <TypingSettings
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
@@ -148,12 +149,12 @@ export function TypingReader() {
       </div>
 
       {/* Main content */}
-      <div className="flex flex-col items-center p-8 pt-32">
+      <div className="flex flex-col items-center p-8 pt-20 sm:pt-24 md:pt-32 lg:pt-40">
         <div className="w-full max-w-4xl">
           {settingsLoaded && (
             <>
               {/* Character count */}
-              <div className="mt-6 mb-8">
+              <div className="mb-8">
                 <div
                   className="font-mono text-primary transition-all duration-200"
                   style={{ fontSize: `${fontSize}px` }}
@@ -161,19 +162,6 @@ export function TypingReader() {
                   {typedText.length}/{displayText.length}
                 </div>
               </div>
-
-              {/* Hidden measurement element */}
-              <span
-                ref={measurementRef}
-                className="font-mono absolute opacity-0 pointer-events-none"
-                style={{
-                  fontSize: `${fontSize}px`,
-                  lineHeight: 'normal',
-                }}
-                aria-hidden="true"
-              >
-                M
-              </span>
 
               {/* Text display */}
               <div
@@ -195,38 +183,26 @@ export function TypingReader() {
             </>
           )}
 
-          {/* Restart button */}
-          <div className="flex justify-center mt-8">
-            <Button
-              onClick={handleRestart}
-              variant="ghost"
-              size="lg"
-              disabled={typedText.length === 0}
-              className="size-14"
-            >
-              <RotateCcw className="size-6" />
-              <span className="sr-only">Restart</span>
-            </Button>
-          </div>
-
           {/* Performance stats (only when finished) */}
           {isFinished && (
             <div
-              className="flex flex-col items-center gap-2 font-mono animate-in fade-in slide-in-from-top-4 duration-300 mt-8"
+              className="font-mono animate-in fade-in slide-in-from-top-4 duration-300 mt-8"
               style={{ fontSize: `${fontSize}px` }}
             >
-              <div>
+              <span className="inline-block whitespace-nowrap">
                 <span className="text-muted-foreground">WPM: </span>
                 <span className="font-semibold">{stats.wpm}</span>
-              </div>
-              <div>
+              </span>
+              {' '}
+              <span className="inline-block whitespace-nowrap">
                 <span className="text-muted-foreground">Accuracy: </span>
                 <span className="font-semibold">{stats.accuracy.toFixed(1)}%</span>
-              </div>
-              <div>
+              </span>
+              {' '}
+              <span className="inline-block whitespace-nowrap">
                 <span className="text-muted-foreground">Errors: </span>
                 <span className="font-semibold text-red-600 dark:text-red-400">{stats.errors}</span>
-              </div>
+              </span>
             </div>
           )}
 

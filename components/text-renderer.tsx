@@ -167,7 +167,7 @@ export const TextRenderer = memo(function TextRenderer({
       className="font-mono transition-all duration-300 ease-out opacity-70"
       style={{
         fontSize: `${fontSize}px`,
-        lineHeight: 'normal',
+        lineHeight: '1.5',
         transform: `translateY(-${scrollOffset}px)`,
         willChange: 'transform',
         wordWrap: 'break-word',
