@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { SAMPLE_TEXTS } from "@/lib/constants"
 
@@ -22,12 +20,19 @@ interface TextInputDialogProps {
   onClose?: () => void
 }
 
-export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: TextInputDialogProps) {
+export function TextInputDialog({
+  onTextSubmit,
+  textButton = false,
+  onClose,
+}: TextInputDialogProps) {
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<
     "paste" | "file" | "url" | "sample"
   >("paste")
-  const [text, setText] = useState("")
+  // Separate text state for each tab
+  const [pasteText, setPasteText] = useState("")
+  const [fileText, setFileText] = useState("")
+  const [urlText, setUrlText] = useState("")
   const [selectedSample, setSelectedSample] = useState<string>("")
   const [url, setUrl] = useState("")
   const [isExtracting, setIsExtracting] = useState(false)
@@ -35,12 +40,23 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
   const [selectedFileName, setSelectedFileName] = useState<string>("")
 
   const handleSubmit = () => {
-    const finalText =
-      activeTab === "sample" && selectedSample ? selectedSample : text
+    let finalText = ""
+    if (activeTab === "sample") {
+      finalText = selectedSample
+    } else if (activeTab === "paste") {
+      finalText = pasteText
+    } else if (activeTab === "file") {
+      finalText = fileText
+    } else if (activeTab === "url") {
+      finalText = urlText
+    }
+
     if (finalText.trim()) {
       onTextSubmit(finalText.trim())
       setOpen(false)
-      setText("")
+      setPasteText("")
+      setFileText("")
+      setUrlText("")
       setSelectedSample("")
     }
   }
@@ -52,7 +68,7 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
       const reader = new FileReader()
       reader.onload = (event) => {
         const content = event.target?.result as string
-        setText(content)
+        setFileText(content)
       }
       reader.readAsText(file)
     }
@@ -82,7 +98,7 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
         return
       }
 
-      setText(data.content)
+      setUrlText(data.content)
       setExtractError("")
     } catch {
       setExtractError("Network error. Please check your connection.")
@@ -95,7 +111,11 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {textButton ? (
-          <Button size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="bg-accent dark:bg-accent/50 hover:bg-accent/80 dark:hover:bg-accent/70 font-semibold"
+          >
             Load text
           </Button>
         ) : (
@@ -106,22 +126,19 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
         )}
       </DialogTrigger>
       <DialogContent
-        className="max-w-2xl max-h-[80vh]"
+        className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto"
         onCloseAutoFocus={(e) => {
           e.preventDefault()
           onClose?.()
         }}
       >
         <DialogHeader>
-          <DialogTitle>Load Text to Read</DialogTitle>
-          <DialogDescription>
-            Choose how you want to input text for speed reading
-          </DialogDescription>
+          <DialogTitle>Load Text</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Tabs */}
-          <div className="flex gap-2 border-b pb-2">
+          <div className="flex gap-2">
             <Button
               variant={activeTab === "paste" ? "secondary" : "ghost"}
               size="sm"
@@ -161,29 +178,27 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
           </div>
 
           {/* Content */}
-          <div className="space-y-4 min-h-[400px]">
+          <div className="flex flex-col min-h-[300px]">
             {activeTab === "paste" && (
-              <div className="space-y-3">
-                <Label htmlFor="text-input">Paste your text here</Label>
+              <div className="flex flex-col flex-1 gap-3">
                 <Textarea
                   id="text-input"
                   placeholder="Paste the text you want to read..."
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  rows={12}
-                  className="resize-none"
+                  value={pasteText}
+                  onChange={(e) => setPasteText(e.target.value)}
+                  className="resize-none flex-1"
                 />
                 <p className="text-sm text-muted-foreground">
-                  {text.split(/\s+/).filter((w) => w.length > 0).length} words
+                  {pasteText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
+                  words
                 </p>
               </div>
             )}
 
             {activeTab === "url" && (
-              <div className="space-y-4">
+              <div className="flex flex-col flex-1 gap-4">
                 <div className="space-y-3">
-                  <Label htmlFor="url-input">Enter article URL</Label>
-                  <div className="flex gap-2">
+                  <div className="flex flex-1 gap-2">
                     <input
                       id="url-input"
                       type="url"
@@ -214,17 +229,15 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
                     Paste a URL to automatically extract readable text
                   </p>
                 </div>
-                {text && (
-                  <div className="space-y-2">
-                    <Label>Extracted text</Label>
+                {urlText && (
+                  <div className="flex flex-col flex-1 gap-2">
                     <Textarea
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      rows={8}
-                      className="resize-none"
+                      value={urlText}
+                      onChange={(e) => setUrlText(e.target.value)}
+                      className="resize-none flex-1"
                     />
                     <p className="text-sm text-muted-foreground">
-                      {text.split(/\s+/).filter((w) => w.length > 0).length}{" "}
+                      {urlText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
                       words
                     </p>
                   </div>
@@ -233,9 +246,8 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
             )}
 
             {activeTab === "file" && (
-              <div className="space-y-4">
+              <div className="flex flex-col flex-1 gap-4">
                 <div className="space-y-3">
-                  <Label htmlFor="file-upload">Upload a text file</Label>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -263,17 +275,15 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
                     Supports .txt and .md files
                   </p>
                 </div>
-                {text && (
-                  <div className="space-y-2">
-                    <Label>Preview</Label>
+                {fileText && (
+                  <div className="flex flex-col flex-1 gap-2">
                     <Textarea
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      rows={8}
-                      className="resize-none"
+                      value={fileText}
+                      onChange={(e) => setFileText(e.target.value)}
+                      className="resize-none flex-1"
                     />
                     <p className="text-sm text-muted-foreground">
-                      {text.split(/\s+/).filter((w) => w.length > 0).length}{" "}
+                      {fileText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
                       words
                     </p>
                   </div>
@@ -283,8 +293,7 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
 
             {activeTab === "sample" && (
               <div className="space-y-3">
-                <Label>Choose a sample text</Label>
-                <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                <div className="space-y-2 max-h-[300px] sm:max-h-[400px] overflow-y-auto">
                   {SAMPLE_TEXTS.map((sample, index) => (
                     <button
                       key={index}
@@ -316,7 +325,17 @@ export function TextInputDialog({ onTextSubmit, textButton = false, onClose }: T
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={activeTab === "sample" ? !selectedSample : !text.trim()}
+              disabled={
+                activeTab === "sample"
+                  ? !selectedSample
+                  : activeTab === "paste"
+                  ? !pasteText.trim()
+                  : activeTab === "file"
+                  ? !fileText.trim()
+                  : activeTab === "url"
+                  ? !urlText.trim()
+                  : true
+              }
             >
               Start Reading
             </Button>
