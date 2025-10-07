@@ -36,6 +36,38 @@ export const TextRenderer = memo(function TextRenderer({
     }
   }, [isFinished, lineHeight])
 
+  // Recalculate scroll on window resize to handle text reflow
+  useEffect(() => {
+    const handleResize = () => {
+      if (isFinished && containerRef.current) {
+        // Recalculate finished state scroll
+        const totalHeight = containerRef.current.scrollHeight
+        const linesToShow = 2
+        const targetOffset = Math.max(0, totalHeight - (lineHeight * linesToShow))
+        setScrollOffset(targetOffset)
+      } else if (!isFinished && typedText.length > 0) {
+        // Recalculate current character position while typing
+        const currentCharIndex = typedText.length
+        const charRef = charRefs.current[currentCharIndex]
+        if (charRef) {
+          const offsetTop = charRef.offsetTop
+          const currentLine = Math.floor(offsetTop / lineHeight)
+
+          if (currentLine >= 2) {
+            const targetVisualY = lineHeight
+            const offset = offsetTop - targetVisualY
+            setScrollOffset(Math.max(0, offset))
+          } else {
+            setScrollOffset(0)
+          }
+        }
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isFinished, lineHeight, typedText.length])
+
   // Reset scroll when font size/line height changes
   useEffect(() => {
     setScrollOffset(0)
