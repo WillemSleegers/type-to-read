@@ -1,2 +1,0 @@
-- [ ] Fix bug that errors are not counted when they are corrected. They should always count as an error.
-- [ ] Replace hardcoded tailwind colors with css variables
