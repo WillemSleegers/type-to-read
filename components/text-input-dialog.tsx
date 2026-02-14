@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
@@ -103,6 +104,9 @@ export function TextInputDialog({
       >
         <DialogHeader>
           <DialogTitle>Load Text</DialogTitle>
+          <DialogDescription>
+            Paste, upload, or choose a sample text to practice typing
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 sm:space-y-4 flex flex-col flex-1 overflow-hidden">
@@ -137,7 +141,7 @@ export function TextInputDialog({
               <div className="flex flex-col h-full gap-2 sm:gap-3 overflow-hidden">
                 <Textarea
                   id="text-input"
-                  placeholder="Paste the text you want to read..."
+                  placeholder="Paste the text you want to type..."
                   value={pasteText}
                   onChange={(e) => setPasteText(e.target.value)}
                   className="resize-none flex-1 min-h-0"
@@ -160,7 +164,7 @@ export function TextInputDialog({
                       className="gap-2"
                       type="button"
                     >
-                      <FileText className="h-4 w-4" />
+                      <FileText className="size-4" />
                       Choose File
                     </Button>
                     <span className="text-sm text-muted-foreground">
@@ -241,7 +245,7 @@ export function TextInputDialog({
                   : true
               }
             >
-              Start Reading
+              Start Typing
             </Button>
           </div>
         </div>

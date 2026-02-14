@@ -19,13 +19,9 @@ const DEFAULT_SETTINGS = {
   includeCapitalization: true,
 }
 
-function getInitialSettings() {
-  if (typeof window === "undefined") return DEFAULT_SETTINGS
-  return loadSettings() ?? DEFAULT_SETTINGS
-}
-
 export function TypingReader() {
-  const [settings, setSettings] = useState(getInitialSettings)
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS)
+  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const { fontSize, includePeriods, includePunctuation, includeCapitalization } = settings
   const [settingsOpen, setSettingsOpen] = useState(false)
 
@@ -60,6 +56,13 @@ export function TypingReader() {
   if (prevDisplayText !== displayText) {
     setPrevDisplayText(displayText)
   }
+
+  // Load persisted settings on mount
+  useEffect(() => {
+    const saved = loadSettings()
+    if (saved) setSettings(saved)
+    setSettingsLoaded(true)
+  }, [])
 
   // Save settings when they change
   useEffect(() => {
@@ -104,7 +107,7 @@ export function TypingReader() {
   }
 
   return (
-    <div className="h-dvh flex flex-col relative overflow-hidden">
+    <div className={`h-dvh flex flex-col relative overflow-hidden transition-opacity duration-150 ${settingsLoaded ? "opacity-100" : "opacity-0"}`}>
       {/* Top left - Load text */}
       <div className="fixed top-0 left-0 p-4 z-10">
         <TextInputDialog
@@ -189,7 +192,7 @@ export function TypingReader() {
               {' '}
               <span className="inline-block whitespace-nowrap">
                 <span className="text-muted-foreground">Errors: </span>
-                <span className="font-semibold text-red-600 dark:text-red-400">{stats.errors}</span>
+                <span className="font-semibold text-destructive">{stats.errors}</span>
               </span>
             </div>
           )}

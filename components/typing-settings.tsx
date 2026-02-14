@@ -45,7 +45,7 @@ export function TypingSettings({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="icon">
-          <Settings className="h-5 w-5" />
+          <Settings className="size-5" />
           <span className="sr-only">Settings</span>
         </Button>
       </DialogTrigger>

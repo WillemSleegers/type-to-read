@@ -111,9 +111,9 @@ export function TextRenderer({
 
       if (charIndex < typedText.length) {
         if (typedText[charIndex] === displayText[charIndex]) {
-          className += " text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30"
+          className += " text-success bg-success-bg"
         } else {
-          className += " text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30"
+          className += " text-destructive bg-destructive-bg"
         }
       } else if (charIndex === typedText.length) {
         className += " bg-primary/20 border-b-2 border-primary animate-pulse"
@@ -150,9 +150,9 @@ export function TextRenderer({
 
       if (charIndex < typedText.length) {
         if (typedText[charIndex] === ' ') {
-          spaceClassName += " text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30"
+          spaceClassName += " text-success bg-success-bg"
         } else {
-          spaceClassName += " text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30"
+          spaceClassName += " text-destructive bg-destructive-bg"
         }
       } else if (charIndex === typedText.length) {
         spaceClassName += " bg-primary/20 border-b-2 border-primary animate-pulse"
@@ -179,7 +179,7 @@ export function TextRenderer({
     elements.push(
       <span
         key="finished"
-        className="ml-4 text-green-600 dark:text-green-400 font-bold animate-in fade-in zoom-in-50 duration-300"
+        className="ml-4 text-success font-bold animate-in fade-in zoom-in-50 duration-300"
       >
         FINISHED
       </span>
