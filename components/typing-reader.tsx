@@ -20,8 +20,7 @@ const DEFAULT_SETTINGS = {
 }
 
 export function TypingReader() {
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS)
-  const [settingsLoaded, setSettingsLoaded] = useState(false)
+  const [settings, setSettings] = useState(() => loadSettings() ?? DEFAULT_SETTINGS)
   const {
     fontSize,
     includePeriods,
@@ -68,13 +67,6 @@ export function TypingReader() {
     setPrevDisplayText(displayText)
   }
 
-  // Load persisted settings on mount
-  useEffect(() => {
-    const saved = loadSettings()
-    if (saved) setSettings(saved)
-    setSettingsLoaded(true)
-  }, [])
-
   // Save settings when they change
   useEffect(() => {
     saveSettings(settings)
@@ -110,19 +102,19 @@ export function TypingReader() {
   }
 
   const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    // Safari inserts non-breaking spaces (\u00A0) instead of regular spaces
-    const value = e.target.value.replace(/\u00A0/g, " ")
+    const value = e.target.value
 
     // Only allow typing up to the length of the display text
     if (value.length <= displayText.length) {
       setTypedText(value)
-      updateStats(value, displayText)
+      // Normalize non-breaking spaces (Safari) for comparison only
+      updateStats(value.replace(/\u00A0/g, " "), displayText)
     }
   }
 
   return (
     <div
-      className={`h-dvh flex flex-col relative overflow-hidden transition-opacity duration-150 ${settingsLoaded ? "opacity-100" : "opacity-0"}`}
+      className="h-dvh flex flex-col relative overflow-hidden"
     >
       {/* Top left - Load text */}
       <div className="fixed top-0 left-0 p-4 z-10">
@@ -188,7 +180,7 @@ export function TypingReader() {
             onClick={() => inputRef.current?.focus()}
           >
             <TextRenderer
-              typedText={typedText}
+              typedText={typedText.replace(/\u00A0/g, " ")}
               displayText={displayText}
               isFinished={isFinished}
               fontSize={fontSize}
