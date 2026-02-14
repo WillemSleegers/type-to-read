@@ -1,4 +1,4 @@
-import { TypingReader } from "@/components/typing-reader";
+import { TypingReader } from "@/components/typing-reader"
 
 export default function Home() {
   return <TypingReader />;

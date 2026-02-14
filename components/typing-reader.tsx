@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
+import { useState, useRef, useEffect } from "react"
 import { RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -10,69 +10,61 @@ import { TextRenderer } from "@/components/text-renderer"
 import { useTypingStats } from "@/hooks/use-typing-stats"
 import { useTextProcessing } from "@/hooks/use-text-processing"
 import { loadSettings, saveSettings } from "@/lib/storage"
-import { DEFAULT_TEXT } from "@/lib/constants"
+import { DEFAULT_TEXT, LINE_HEIGHT_RATIO } from "@/lib/constants"
+
+const DEFAULT_SETTINGS = {
+  fontSize: 24,
+  includePeriods: true,
+  includePunctuation: true,
+  includeCapitalization: true,
+}
+
+function getInitialSettings() {
+  if (typeof window === "undefined") return DEFAULT_SETTINGS
+  return loadSettings() ?? DEFAULT_SETTINGS
+}
 
 export function TypingReader() {
-  // Settings
-  const [fontSize, setFontSize] = useState(24)
-  const [includePeriods, setIncludePeriods] = useState(true)
-  const [includePunctuation, setIncludePunctuation] = useState(true)
-  const [includeCapitalization, setIncludeCapitalization] = useState(true)
+  const [settings, setSettings] = useState(getInitialSettings)
+  const { fontSize, includePeriods, includePunctuation, includeCapitalization } = settings
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [settingsLoaded, setSettingsLoaded] = useState(false)
 
   // Text state
   const [text, setText] = useState(DEFAULT_TEXT)
   const [typedText, setTypedText] = useState("")
 
+  // Track displayText changes to reset typedText
+  const [prevDisplayText, setPrevDisplayText] = useState<string | null>(null)
+
   // Refs
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const initializedRef = useRef(false)
 
   // Calculate line height based on explicit line-height ratio
-  const lineHeight = fontSize * 1.5
+  const lineHeight = fontSize * LINE_HEIGHT_RATIO
 
   // Process text based on settings
   const displayText = useTextProcessing(text, includePeriods, includePunctuation, includeCapitalization)
 
   // Calculate stats
-  const { stats, reset: resetStats } = useTypingStats(typedText, displayText)
+  const { stats, updateStats, reset: resetStats } = useTypingStats()
   const isFinished = typedText.length === displayText.length && displayText.length > 0
 
   // Container height: 3 lines while typing, 2 lines when finished
   const containerHeight = isFinished ? lineHeight * 2 : lineHeight * 3
 
-  // Load settings on mount
-  useEffect(() => {
-    if (initializedRef.current) return
-    initializedRef.current = true
-
-    const settings = loadSettings()
-    if (settings) {
-      setFontSize(settings.fontSize)
-      setIncludePeriods(settings.includePeriods ?? true)
-      setIncludePunctuation(settings.includePunctuation)
-      setIncludeCapitalization(settings.includeCapitalization)
-    }
-    setSettingsLoaded(true)
-  }, [])
+  // Reset typed text when display text changes
+  if (prevDisplayText !== null && prevDisplayText !== displayText) {
+    setTypedText("")
+    resetStats()
+  }
+  if (prevDisplayText !== displayText) {
+    setPrevDisplayText(displayText)
+  }
 
   // Save settings when they change
   useEffect(() => {
-    if (!settingsLoaded) return
-    saveSettings({
-      fontSize,
-      includePeriods,
-      includePunctuation,
-      includeCapitalization,
-    })
-  }, [fontSize, includePeriods, includePunctuation, includeCapitalization, settingsLoaded])
-
-  // Reset typed text when display text changes
-  useEffect(() => {
-    setTypedText("")
-    resetStats()
-  }, [displayText, resetStats])
+    saveSettings(settings)
+  }, [settings])
 
   // Auto-focus textarea when clicking anywhere on the page
   useEffect(() => {
@@ -88,27 +80,28 @@ export function TypingReader() {
     return () => document.removeEventListener('click', handleClick)
   }, [])
 
-  const handleTextSubmit = useCallback((newText: string) => {
+  const handleTextSubmit = (newText: string) => {
     setText(newText)
     setTypedText("")
     resetStats()
-    setTimeout(() => inputRef.current?.focus(), 100)
-  }, [resetStats])
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
 
-  const handleRestart = useCallback(() => {
+  const handleRestart = () => {
     setTypedText("")
     resetStats()
-    setTimeout(() => inputRef.current?.focus(), 0)
-  }, [resetStats])
+    requestAnimationFrame(() => inputRef.current?.focus())
+  }
 
-  const handleTyping = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value
 
     // Only allow typing up to the length of the display text
     if (value.length <= displayText.length) {
       setTypedText(value)
+      updateStats(value, displayText)
     }
-  }, [displayText.length])
+  }
 
   return (
     <div className="h-dvh flex flex-col relative overflow-hidden">
@@ -136,13 +129,13 @@ export function TypingReader() {
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
           fontSize={fontSize}
-          onFontSizeChange={setFontSize}
+          onFontSizeChange={(v) => setSettings(s => ({ ...s, fontSize: v }))}
           includePeriods={includePeriods}
-          onIncludePeriodsChange={setIncludePeriods}
+          onIncludePeriodsChange={(v) => setSettings(s => ({ ...s, includePeriods: v }))}
           includePunctuation={includePunctuation}
-          onIncludePunctuationChange={setIncludePunctuation}
+          onIncludePunctuationChange={(v) => setSettings(s => ({ ...s, includePunctuation: v }))}
           includeCapitalization={includeCapitalization}
-          onIncludeCapitalizationChange={setIncludeCapitalization}
+          onIncludeCapitalizationChange={(v) => setSettings(s => ({ ...s, includeCapitalization: v }))}
           onClose={() => inputRef.current?.focus()}
         />
         <ThemeToggle onToggle={() => inputRef.current?.focus()} />
@@ -151,37 +144,32 @@ export function TypingReader() {
       {/* Main content */}
       <div className="flex flex-col items-center p-8 pt-20 sm:pt-24 md:pt-32 lg:pt-40">
         <div className="w-full max-w-4xl">
-          {settingsLoaded && (
-            <>
-              {/* Character count */}
-              <div className="mb-8">
-                <div
-                  className="font-mono text-primary transition-all duration-200"
-                  style={{ fontSize: `${fontSize}px` }}
-                >
-                  {typedText.length}/{displayText.length}
-                </div>
-              </div>
+          {/* Character count */}
+          <div className="mb-8">
+            <div
+              className="font-mono text-primary transition-all duration-200"
+              style={{ fontSize: `${fontSize}px` }}
+            >
+              {typedText.length}/{displayText.length}
+            </div>
+          </div>
 
-              {/* Text display */}
-              <div
-                className="relative overflow-hidden"
-                style={{
-                  height: `${containerHeight}px`, // 3 lines visible
-                }}
-                onClick={() => inputRef.current?.focus()}
-              >
-                <TextRenderer
-                  typedText={typedText}
-                  displayText={displayText}
-                  isFinished={isFinished}
-                  fontSize={fontSize}
-                  lineHeight={lineHeight}
-                />
-              </div>
-
-            </>
-          )}
+          {/* Text display */}
+          <div
+            className="relative overflow-hidden"
+            style={{
+              height: `${containerHeight}px`,
+            }}
+            onClick={() => inputRef.current?.focus()}
+          >
+            <TextRenderer
+              typedText={typedText}
+              displayText={displayText}
+              isFinished={isFinished}
+              fontSize={fontSize}
+              lineHeight={lineHeight}
+            />
+          </div>
 
           {/* Performance stats (only when finished) */}
           {isFinished && (
@@ -212,6 +200,7 @@ export function TypingReader() {
             value={typedText}
             onChange={handleTyping}
             className="sr-only"
+            aria-label="Type the displayed text"
             autoFocus
             spellCheck={false}
             autoCorrect="off"

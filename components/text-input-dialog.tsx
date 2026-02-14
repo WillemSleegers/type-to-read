@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { FileText, Loader2 } from "lucide-react"
+import { FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,6 +13,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { SAMPLE_TEXTS } from "@/lib/constants"
+import { countWords } from "@/lib/utils"
 
 interface TextInputDialogProps {
   onTextSubmit: (text: string) => void
@@ -27,16 +28,12 @@ export function TextInputDialog({
 }: TextInputDialogProps) {
   const [open, setOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<
-    "paste" | "file" | "url" | "sample"
+    "paste" | "file" | "sample"
   >("paste")
   // Separate text state for each tab
   const [pasteText, setPasteText] = useState("")
   const [fileText, setFileText] = useState("")
-  const [urlText, setUrlText] = useState("")
   const [selectedSample, setSelectedSample] = useState<string>("")
-  const [url, setUrl] = useState("")
-  const [isExtracting, setIsExtracting] = useState(false)
-  const [extractError, setExtractError] = useState("")
   const [selectedFileName, setSelectedFileName] = useState<string>("")
 
   const handleSubmit = () => {
@@ -47,8 +44,6 @@ export function TextInputDialog({
       finalText = pasteText
     } else if (activeTab === "file") {
       finalText = fileText
-    } else if (activeTab === "url") {
-      finalText = urlText
     }
 
     if (finalText.trim()) {
@@ -56,7 +51,6 @@ export function TextInputDialog({
       setOpen(false)
       setPasteText("")
       setFileText("")
-      setUrlText("")
       setSelectedSample("")
     }
   }
@@ -70,41 +64,16 @@ export function TextInputDialog({
         const content = event.target?.result as string
         setFileText(content)
       }
+      reader.onerror = () => {
+        setSelectedFileName("")
+        setFileText("")
+      }
       reader.readAsText(file)
     }
   }
 
   const handleSampleSelect = (sampleText: string) => {
     setSelectedSample(sampleText)
-  }
-
-  const handleUrlExtract = async () => {
-    if (!url.trim()) return
-
-    setIsExtracting(true)
-    setExtractError("")
-
-    try {
-      const response = await fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setExtractError(data.error || "Failed to extract text")
-        return
-      }
-
-      setUrlText(data.content)
-      setExtractError("")
-    } catch {
-      setExtractError("Network error. Please check your connection.")
-    } finally {
-      setIsExtracting(false)
-    }
   }
 
   return (
@@ -154,13 +123,6 @@ export function TextInputDialog({
               File
             </Button>
             <Button
-              variant={activeTab === "url" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setActiveTab("url")}
-            >
-              URL
-            </Button>
-            <Button
               variant={activeTab === "sample" ? "secondary" : "ghost"}
               size="sm"
               onClick={() => setActiveTab("sample")}
@@ -181,61 +143,8 @@ export function TextInputDialog({
                   className="resize-none flex-1 min-h-0"
                 />
                 <p className="text-sm text-muted-foreground flex-shrink-0">
-                  {pasteText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
-                  words
+                  {countWords(pasteText)} words
                 </p>
-              </div>
-            )}
-
-            {activeTab === "url" && (
-              <div className="flex flex-col h-full gap-2 sm:gap-3">
-                <div className="space-y-2 sm:space-y-3 flex-shrink-0">
-                  <div className="flex flex-1 gap-2">
-                    <input
-                      id="url-input"
-                      type="url"
-                      placeholder="https://example.com/article"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      className="flex-1 px-3 py-2 rounded-md border border-input bg-background text-sm"
-                      disabled={isExtracting}
-                    />
-                    <Button
-                      onClick={handleUrlExtract}
-                      disabled={!url.trim() || isExtracting}
-                    >
-                      {isExtracting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Extracting...
-                        </>
-                      ) : (
-                        "Extract"
-                      )}
-                    </Button>
-                  </div>
-                  {extractError && (
-                    <p className="text-sm text-destructive">{extractError}</p>
-                  )}
-                  <p className="text-sm text-muted-foreground">
-                    Paste a URL to automatically extract readable text
-                  </p>
-                </div>
-                <div className="flex flex-col flex-1 gap-2 min-h-0 overflow-hidden">
-                  {urlText && (
-                    <>
-                      <Textarea
-                        value={urlText}
-                        onChange={(e) => setUrlText(e.target.value)}
-                        className="resize-none flex-1 min-h-0"
-                      />
-                      <p className="text-sm text-muted-foreground">
-                        {urlText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
-                        words
-                      </p>
-                    </>
-                  )}
-                </div>
               </div>
             )}
 
@@ -278,8 +187,7 @@ export function TextInputDialog({
                         className="resize-none flex-1 min-h-0"
                       />
                       <p className="text-sm text-muted-foreground">
-                        {fileText.split(/\s+/).filter((w) => w.length > 0).length}{" "}
-                        words
+                        {countWords(fileText)} words
                       </p>
                     </>
                   )}
@@ -305,7 +213,7 @@ export function TextInputDialog({
                         {sample.text}
                       </div>
                       <div className="text-xs text-muted-foreground mt-1.5 sm:mt-2">
-                        {sample.text.split(/\s+/).length} words
+                        {countWords(sample.text)} words
                       </div>
                     </button>
                   ))}
@@ -328,8 +236,6 @@ export function TextInputDialog({
                   ? !pasteText.trim()
                   : activeTab === "file"
                   ? !fileText.trim()
-                  : activeTab === "url"
-                  ? !urlText.trim()
                   : true
               }
             >

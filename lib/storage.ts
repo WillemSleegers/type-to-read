@@ -10,12 +10,18 @@ export interface TypingSettings {
 const SETTINGS_KEY = 'type-to-read-settings'
 
 export function loadSettings(): TypingSettings | null {
-  if (typeof window === 'undefined') return null
-  const stored = localStorage.getItem(SETTINGS_KEY)
-  return stored ? JSON.parse(stored) : null
+  try {
+    const stored = localStorage.getItem(SETTINGS_KEY)
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    return null
+  }
 }
 
 export function saveSettings(settings: TypingSettings): void {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+  } catch {
+    // Silently fail (e.g. private browsing, quota exceeded)
+  }
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 
 export interface TypingStats {
   wpm: number
@@ -16,23 +16,24 @@ const initialStats: TypingStats = {
   totalChars: 0,
 }
 
-export function useTypingStats(typedText: string, displayText: string) {
+export function useTypingStats() {
   const [stats, setStats] = useState<TypingStats>(initialStats)
   const [startTime, setStartTime] = useState<number | null>(null)
 
-  useEffect(() => {
+  const updateStats = (typedText: string, displayText: string) => {
     if (typedText.length === 0) {
       setStats(initialStats)
       setStartTime(null)
       return
     }
 
-    // Start timer on first character
-    if (startTime === null) {
-      setStartTime(Date.now())
+    const now = Date.now()
+    let currentStartTime = startTime
+    if (currentStartTime === null) {
+      currentStartTime = now
+      setStartTime(now)
     }
 
-    // Calculate stats
     const totalChars = typedText.length
     let correctChars = 0
     let errors = 0
@@ -47,28 +48,19 @@ export function useTypingStats(typedText: string, displayText: string) {
 
     const accuracy = totalChars > 0 ? (correctChars / totalChars) * 100 : 100
 
-    // Calculate WPM (assuming average word length of 5 characters)
     let wpm = 0
-    if (startTime) {
-      const timeElapsed = (Date.now() - startTime) / 1000 / 60 // minutes
-      if (timeElapsed > 0) {
-        wpm = Math.round((correctChars / 5) / timeElapsed)
-      }
+    const timeElapsed = (now - currentStartTime) / 1000 / 60
+    if (timeElapsed > 0) {
+      wpm = Math.round((correctChars / 5) / timeElapsed)
     }
 
-    setStats({
-      wpm,
-      accuracy,
-      errors,
-      correctChars,
-      totalChars,
-    })
-  }, [typedText, displayText, startTime])
+    setStats({ wpm, accuracy, errors, correctChars, totalChars })
+  }
 
-  const reset = useCallback(() => {
+  const reset = () => {
     setStats(initialStats)
     setStartTime(null)
-  }, [])
+  }
 
-  return { stats, reset }
+  return { stats, updateStats, reset }
 }

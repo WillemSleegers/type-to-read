@@ -1,28 +1,5 @@
-// Default reading settings
-export const DEFAULT_WPM = 300
-export const DEFAULT_FONT_SIZE = 60
-
-// WPM constraints
-export const MIN_WPM = 100
-export const MAX_WPM = 1000
-export const WPM_STEP = 50
-
-// Font size constraints
-export const MIN_FONT_SIZE = 24
-export const MAX_FONT_SIZE = 120
-export const FONT_SIZE_STEP = 4
-
-// Punctuation delay multipliers
-export const SENTENCE_END_DELAY = 2.5
-export const COMMA_DELAY = 1.5
-export const LONG_WORD_DELAY = 1.3
-export const VERY_LONG_WORD_DELAY = 1.5
-export const SHORT_WORD_DELAY = 0.8
-
-// Word length thresholds
-export const LONG_WORD_THRESHOLD = 8
-export const VERY_LONG_WORD_THRESHOLD = 12
-export const SHORT_WORD_THRESHOLD = 3
+// Line height multiplier used for scroll calculations and container sizing
+export const LINE_HEIGHT_RATIO = 1.5
 
 // Default welcome text
 export const DEFAULT_TEXT = `Welcome to Type to Read! This is a typing practice app that lets you learn to type while reading content you actually want to read. Start typing the text you see, and watch your speed and accuracy improve. The more you type, the better you get. Try loading your own text to practice typing while learning something new. Happy typing!`
