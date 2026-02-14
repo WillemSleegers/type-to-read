@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { InfoDialog } from "@/components/info-dialog"
 import { TextInputDialog } from "@/components/text-input-dialog"
 import { TypingSettings } from "@/components/typing-settings"
 import { TextRenderer } from "@/components/text-renderer"
@@ -136,6 +137,7 @@ export function TypingReader() {
           <RotateCcw className="size-4" />
           <span className="sr-only">Restart</span>
         </Button>
+        <InfoDialog onClose={() => inputRef.current?.focus()} />
         <TypingSettings
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
