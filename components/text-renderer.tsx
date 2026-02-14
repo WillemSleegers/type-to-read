@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from "react"
 
 interface TextRendererProps {
   typedText: string
@@ -33,7 +33,7 @@ export function TextRenderer({
     if (isFinished && containerRef.current) {
       const totalHeight = containerRef.current.scrollHeight
       const linesToShow = 2
-      const targetOffset = Math.max(0, totalHeight - (lineHeight * linesToShow))
+      const targetOffset = Math.max(0, totalHeight - lineHeight * linesToShow)
       setScrollOffset(targetOffset)
     }
   }, [isFinished, lineHeight])
@@ -44,7 +44,7 @@ export function TextRenderer({
       if (isFinished && containerRef.current) {
         const totalHeight = containerRef.current.scrollHeight
         const linesToShow = 2
-        const targetOffset = Math.max(0, totalHeight - (lineHeight * linesToShow))
+        const targetOffset = Math.max(0, totalHeight - lineHeight * linesToShow)
         setScrollOffset(targetOffset)
       } else if (!isFinished && typedText.length > 0) {
         const currentCharIndex = typedText.length
@@ -64,8 +64,8 @@ export function TextRenderer({
       }
     }
 
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
   }, [isFinished, lineHeight, typedText.length])
 
   // Reset scroll when font size/line height changes
@@ -100,14 +100,14 @@ export function TextRenderer({
   const elements: React.JSX.Element[] = []
   let charIndex = 0
 
-  const parts = displayText.split(' ')
+  const parts = displayText.split(" ")
 
   parts.forEach((word, wordIdx) => {
     const wordChars: React.JSX.Element[] = []
 
     for (let i = 0; i < word.length; i++) {
       const char = word[i]
-      let className = "transition-all duration-150"
+      let className = "transition-colors duration-150"
 
       if (charIndex < typedText.length) {
         if (typedText[charIndex] === displayText[charIndex]) {
@@ -125,7 +125,7 @@ export function TextRenderer({
       wordChars.push(
         <span
           key={currentIndex}
-          ref={el => {
+          ref={(el) => {
             charRefs.current[currentIndex] = el
             if (el && currentIndex === typedText.length) {
               requestAnimationFrame(() => updateScroll(currentIndex))
@@ -134,7 +134,7 @@ export function TextRenderer({
           className={className}
         >
           {char}
-        </span>
+        </span>,
       )
       charIndex++
     }
@@ -142,34 +142,36 @@ export function TextRenderer({
     elements.push(
       <span key={`word-${wordIdx}`} className="inline-block whitespace-nowrap">
         {wordChars}
-      </span>
+      </span>,
     )
 
     if (wordIdx < parts.length - 1) {
-      let spaceClassName = "transition-all duration-150"
+      let spaceClassName = "transition-colors duration-150"
 
       if (charIndex < typedText.length) {
-        if (typedText[charIndex] === ' ') {
+        if (typedText[charIndex] === displayText[charIndex]) {
           spaceClassName += " text-success bg-success-bg"
         } else {
           spaceClassName += " text-destructive bg-destructive-bg"
         }
       } else if (charIndex === typedText.length) {
-        spaceClassName += " bg-primary/20 border-b-2 border-primary animate-pulse"
+        spaceClassName +=
+          " bg-primary/20 border-b-2 border-primary animate-pulse"
       } else {
         spaceClassName += " text-muted-foreground"
       }
 
+      const currentIndex = charIndex
       elements.push(
         <span
           key={`space-${wordIdx}`}
-          ref={el => {
-            charRefs.current[charIndex] = el
+          ref={(el) => {
+            charRefs.current[currentIndex] = el
           }}
           className={spaceClassName}
         >
-          {'\u00A0'}
-        </span>
+          {"\u00A0"}
+        </span>,
       )
       charIndex++
     }
@@ -182,7 +184,7 @@ export function TextRenderer({
         className="ml-4 text-success font-bold animate-in fade-in zoom-in-50 duration-300"
       >
         FINISHED
-      </span>
+      </span>,
     )
   }
 
@@ -192,10 +194,10 @@ export function TextRenderer({
       className="font-mono transition-all duration-300 ease-out opacity-70"
       style={{
         fontSize: `${fontSize}px`,
-        lineHeight: '1.5',
+        lineHeight: "1.5",
         transform: `translateY(-${scrollOffset}px)`,
-        wordWrap: 'break-word',
-        whiteSpace: 'normal',
+        wordWrap: "break-word",
+        whiteSpace: "normal",
       }}
     >
       {elements}

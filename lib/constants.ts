@@ -2,7 +2,7 @@
 export const LINE_HEIGHT_RATIO = 1.5
 
 // Default welcome text
-export const DEFAULT_TEXT = `Welcome to Type to Read! This is a typing practice app that lets you learn to type while reading content you actually want to read. Start typing the text you see, and watch your speed and accuracy improve. The more you type, the better you get. Try loading your own text to practice typing while learning something new. Happy typing!`
+export const DEFAULT_TEXT = `Welcome to Type to Read! This is a typing practice app that lets you learn to type while reading content you want to read. Start typing the text you see, and watch your speed and accuracy improve. The more you type, the better you get. Try loading your own text to practice typing while learning something new. Happy typing!`
 
 // Sample texts for the text input dialog
 export const SAMPLE_TEXTS = [
@@ -17,9 +17,5 @@ export const SAMPLE_TEXTS = [
   {
     title: "The Power of Practice",
     text: `Deliberate practice is the key to mastery in any skill, and typing is no exception. Unlike mindless repetition, deliberate practice involves focused attention on improving specific aspects of your performance. When you practice typing, pay attention to your mistakes. Which keys do you frequently miss? Which finger movements feel awkward? By identifying and addressing these weak points, you'll improve much faster than if you simply type without thinking. Track your progress over time and celebrate small improvements.`,
-  },
-  {
-    title: "Reading While Typing",
-    text: `Type to Read combines two valuable skills: typing and reading comprehension. As you type, you're not just mechanically copying characters. You're actively engaging with the content, processing its meaning, and reinforcing your understanding. This dual engagement can actually improve retention compared to passive reading. The act of typing each word forces you to pay closer attention to the text. You'll find that you remember more of what you read when you've typed it out. It's a win-win for your typing skills and your learning.`,
   },
 ]

@@ -22,7 +22,12 @@ const DEFAULT_SETTINGS = {
 export function TypingReader() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [settingsLoaded, setSettingsLoaded] = useState(false)
-  const { fontSize, includePeriods, includePunctuation, includeCapitalization } = settings
+  const {
+    fontSize,
+    includePeriods,
+    includePunctuation,
+    includeCapitalization,
+  } = settings
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   // Text state
@@ -39,11 +44,17 @@ export function TypingReader() {
   const lineHeight = fontSize * LINE_HEIGHT_RATIO
 
   // Process text based on settings
-  const displayText = useTextProcessing(text, includePeriods, includePunctuation, includeCapitalization)
+  const displayText = useTextProcessing(
+    text,
+    includePeriods,
+    includePunctuation,
+    includeCapitalization,
+  )
 
   // Calculate stats
   const { stats, updateStats, reset: resetStats } = useTypingStats()
-  const isFinished = typedText.length === displayText.length && displayText.length > 0
+  const isFinished =
+    typedText.length === displayText.length && displayText.length > 0
 
   // Container height: 3 lines while typing, 2 lines when finished
   const containerHeight = isFinished ? lineHeight * 2 : lineHeight * 3
@@ -72,15 +83,17 @@ export function TypingReader() {
   // Auto-focus textarea when clicking anywhere on the page
   useEffect(() => {
     const handleClick = () => {
-      if (document.activeElement?.tagName !== 'INPUT' &&
-          document.activeElement?.tagName !== 'TEXTAREA' &&
-          document.activeElement?.tagName !== 'BUTTON') {
+      if (
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA" &&
+        document.activeElement?.tagName !== "BUTTON"
+      ) {
         inputRef.current?.focus()
       }
     }
 
-    document.addEventListener('click', handleClick)
-    return () => document.removeEventListener('click', handleClick)
+    document.addEventListener("click", handleClick)
+    return () => document.removeEventListener("click", handleClick)
   }, [])
 
   const handleTextSubmit = (newText: string) => {
@@ -97,7 +110,8 @@ export function TypingReader() {
   }
 
   const handleTyping = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
+    // Safari inserts non-breaking spaces (\u00A0) instead of regular spaces
+    const value = e.target.value.replace(/\u00A0/g, " ")
 
     // Only allow typing up to the length of the display text
     if (value.length <= displayText.length) {
@@ -107,7 +121,9 @@ export function TypingReader() {
   }
 
   return (
-    <div className={`h-dvh flex flex-col relative overflow-hidden transition-opacity duration-150 ${settingsLoaded ? "opacity-100" : "opacity-0"}`}>
+    <div
+      className={`h-dvh flex flex-col relative overflow-hidden transition-opacity duration-150 ${settingsLoaded ? "opacity-100" : "opacity-0"}`}
+    >
       {/* Top left - Load text */}
       <div className="fixed top-0 left-0 p-4 z-10">
         <TextInputDialog
@@ -132,13 +148,19 @@ export function TypingReader() {
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
           fontSize={fontSize}
-          onFontSizeChange={(v) => setSettings(s => ({ ...s, fontSize: v }))}
+          onFontSizeChange={(v) => setSettings((s) => ({ ...s, fontSize: v }))}
           includePeriods={includePeriods}
-          onIncludePeriodsChange={(v) => setSettings(s => ({ ...s, includePeriods: v }))}
+          onIncludePeriodsChange={(v) =>
+            setSettings((s) => ({ ...s, includePeriods: v }))
+          }
           includePunctuation={includePunctuation}
-          onIncludePunctuationChange={(v) => setSettings(s => ({ ...s, includePunctuation: v }))}
+          onIncludePunctuationChange={(v) =>
+            setSettings((s) => ({ ...s, includePunctuation: v }))
+          }
           includeCapitalization={includeCapitalization}
-          onIncludeCapitalizationChange={(v) => setSettings(s => ({ ...s, includeCapitalization: v }))}
+          onIncludeCapitalizationChange={(v) =>
+            setSettings((s) => ({ ...s, includeCapitalization: v }))
+          }
           onClose={() => inputRef.current?.focus()}
         />
         <ThemeToggle onToggle={() => inputRef.current?.focus()} />
@@ -183,16 +205,18 @@ export function TypingReader() {
               <span className="inline-block whitespace-nowrap">
                 <span className="text-muted-foreground">WPM: </span>
                 <span className="font-semibold">{stats.wpm}</span>
-              </span>
-              {' '}
+              </span>{" "}
               <span className="inline-block whitespace-nowrap">
                 <span className="text-muted-foreground">Accuracy: </span>
-                <span className="font-semibold">{stats.accuracy.toFixed(1)}%</span>
-              </span>
-              {' '}
+                <span className="font-semibold">
+                  {stats.accuracy.toFixed(1)}%
+                </span>
+              </span>{" "}
               <span className="inline-block whitespace-nowrap">
                 <span className="text-muted-foreground">Errors: </span>
-                <span className="font-semibold text-destructive">{stats.errors}</span>
+                <span className="font-semibold text-destructive">
+                  {stats.errors}
+                </span>
               </span>
             </div>
           )}
