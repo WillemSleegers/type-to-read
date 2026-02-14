@@ -27,9 +27,9 @@ export function TextInputDialog({
   onClose,
 }: TextInputDialogProps) {
   const [open, setOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<
-    "paste" | "file" | "sample"
-  >("paste")
+  const [activeTab, setActiveTab] = useState<"paste" | "file" | "sample">(
+    "paste"
+  )
   // Separate text state for each tab
   const [pasteText, setPasteText] = useState("")
   const [fileText, setFileText] = useState("")
@@ -95,7 +95,7 @@ export function TextInputDialog({
         )}
       </DialogTrigger>
       <DialogContent
-        className="max-w-[95vw] sm:max-w-2xl h-[600px] flex flex-col"
+        className="max-w-[95vw] sm:max-w-2xl h-150 flex flex-col"
         onCloseAutoFocus={(e) => {
           e.preventDefault()
           onClose?.()
@@ -142,7 +142,7 @@ export function TextInputDialog({
                   onChange={(e) => setPasteText(e.target.value)}
                   className="resize-none flex-1 min-h-0"
                 />
-                <p className="text-sm text-muted-foreground flex-shrink-0">
+                <p className="text-sm text-muted-foreground shrink-0">
                   {countWords(pasteText)} words
                 </p>
               </div>
@@ -150,7 +150,7 @@ export function TextInputDialog({
 
             {activeTab === "file" && (
               <div className="flex flex-col h-full gap-2 sm:gap-3">
-                <div className="space-y-2 sm:space-y-3 flex-shrink-0">
+                <div className="space-y-2 sm:space-y-3 shrink-0">
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
@@ -208,7 +208,9 @@ export function TextInputDialog({
                           : "hover:bg-secondary/50"
                       }`}
                     >
-                      <div className="font-semibold text-base">{sample.title}</div>
+                      <div className="font-semibold text-base">
+                        {sample.title}
+                      </div>
                       <div className="text-sm text-muted-foreground mt-1 line-clamp-2">
                         {sample.text}
                       </div>
@@ -223,7 +225,7 @@ export function TextInputDialog({
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-3 sm:pt-4 flex-shrink-0">
+          <div className="flex justify-end gap-2 pt-3 sm:pt-4 shrink-0">
             <Button variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
